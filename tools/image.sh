@@ -40,23 +40,26 @@ if [[ -e $root ]]; then
     # Files of subordinate IDs can only be removed from inside the namespace.
     "${as_root[@]}" rm -rf -- "$root"
 fi
-"$cps" image-create --root "$root" --repo "$repo" --publisher canopa \
+# Every command runs in the namespace, so the image owner recorded at
+# creation is the same root that owns the packaged usr/ directories above
+# the image state in usr/lib/sysimage/cps.
+"${as_root[@]}" "$cps" image-create --root "$root" --repo "$repo" --publisher canopa \
     --trust-root "$cache/keys/canopa.trust.json"
-"$cps" plan --root "$root" --output "$root.plan.json" install "${packages[@]}"
+"${as_root[@]}" "$cps" plan --root "$root" --output "$root.plan.json" install "${packages[@]}"
 "${as_root[@]}" "$cps" apply --root "$root" "$root.plan.json"
 "${as_root[@]}" "$cps" verify --root "$root"
-# --pristine also reports unmanaged paths. Declared systemd actions create
-# some by design: tmpfiles state under var/ and the account databases that
-# sysusers writes in etc/. Those are expected (see docs/bootstrap.md, open
-# issues); any other unmanaged path is a failure.
-action_state='^error: unmanaged path "(var/|etc/(passwd|group|shadow|gshadow|\.pwd\.lock)")'
+# --pristine also reports unmanaged paths. The account databases that the
+# declared sysusers actions write in etc/ are expected (see docs/bootstrap.md,
+# open issues); any other unmanaged path is a failure. tmpfiles rules for
+# /var run at boot, so an offline image leaves var/ empty.
+action_state='^error: unmanaged path "etc/(passwd|group|shadow|gshadow|\.pwd\.lock)"'
 if ! pristine=$("${as_root[@]}" "$cps" verify --root "$root" --pristine 2>&1); then
     unexpected=$(grep -Ev "$action_state" <<< "$pristine" || true)
     if [[ -n $unexpected ]]; then
         printf '%s\n' "$unexpected" >&2
         die 'pristine verification failed'
     fi
-    note "pristine verification: only state from tmpfiles and sysusers actions is unmanaged ($(grep -Ec "$action_state" <<< "$pristine") path(s))"
+    note "pristine verification: only the account databases from sysusers actions are unmanaged ($(grep -Ec "$action_state" <<< "$pristine") path(s))"
 fi
-"$cps" list --root "$root"
+"${as_root[@]}" "$cps" list --root "$root"
 note "installed and verified ${#packages[@]} package(s) in ${root#"$top"/}"
