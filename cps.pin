@@ -2,13 +2,7 @@
 # and tested against. CPS formats are unreleased and change in place, so
 # recipes track one commit and bump it deliberately; see CONTRIBUTING.md.
 #
-# TEMPORARY: this commit is the head of the CPS branch ws/recipe-pins
-# (cps recipe repin --manifests/--sources/--trust-root/--check), which is
-# not merged into main yet. Bump to the merged commit once it lands; see
-# CONTRIBUTING.md, "The CPS pin". Until then, set CPS_SOURCE to a checkout
-# that has the branch.
-#
 # Read by tools/cps.sh (POSIX sh: KEY=value, no spaces around "=").
-CPS_COMMIT=fb3e088436d5fa5ab0d4f1c179d60cd57cc69fd9
+CPS_COMMIT=cad6dc3764ea27d5e0eaa403ed7c94a8a4defbf1
 # Default source for tools/cps.sh; override with CPS_SOURCE=PATH-or-URL.
 CPS_URL=https://github.com/kevinard/cps.git

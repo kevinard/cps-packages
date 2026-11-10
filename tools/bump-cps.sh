@@ -20,6 +20,11 @@ else
 fi
 recipe=$top/recipes/system/cps/build.kdl
 sed -i -E "s/^(build architecture=\"[^\"]*\" epoch=)[0-9]+/\\1$epoch/" "$recipe"
-sed -i -E "s/^(    version \"[^\"]*\" upstream=\"0\\.1\\.0\\+git\\.)[0-9a-f]+\"/\\1${commit:0:10}\"/" "$recipe"
+# Each snapshot is a new package version: the upstream string names the
+# commit, and the revision goes up so the published package ID changes too.
+version=$(sed -n -E 's/^    version "([^"]*)" upstream=.*/\1/p' "$recipe")
+[[ $version =~ ^(.*)-([0-9]+)$ ]] || die "cannot read the system/cps version from $recipe"
+version="${BASH_REMATCH[1]}-$((BASH_REMATCH[2] + 1))"
+sed -i -E "s/^(    version \")[^\"]*(\" upstream=\"0\\.1\\.0\\+git\\.)[0-9a-f]+\"/\\1$version\\2${commit:0:10}\"/" "$recipe"
 "$cps" recipe repin --sources "$distfiles" "$recipe"
-note "pinned CPS $commit; bump the system/cps revision if the upstream string did not change"
+note "pinned CPS $commit as system/cps $version"

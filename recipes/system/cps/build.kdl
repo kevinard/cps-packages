@@ -1,7 +1,7 @@
 schema-version 1 kind="build-recipe"
 // CPS from the commit in cps.pin. The toolchain takes SQLite and libseccomp
 // from canopa, so this recipe builds after them and pins both catalogs.
-build architecture="x86_64" epoch=1794315841 {
+build architecture="x86_64" epoch=1794325154 {
     toolchain solver="sat-v2" {
         publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
         publisher "canopa" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
@@ -9,10 +9,10 @@ build architecture="x86_64" epoch=1794315841 {
         package "library/sqlite"
         package "library/libseccomp"
     }
-    version "0.1.0-1" upstream="0.1.0+git.fb3e088436"
-    manifest "cps.kdl" sha256="5777fc819a9f36283ab375d4aead32c8dc1d4941bad3b2f80a5329542fe8f8fa"
-    source "cps.tar.gz" size=888477 sha256="06ba5d2b6c4cf78eca47572670f0508cb1e4ab7b6acabc4df36bfa343b9a3d27"
-    source "cps-vendor.tar.gz" size=55327669 sha256="a0bb4af5a3cfd7d70bb538d0514afe1fd0e97cbcbacc4bd53fc698d21e422792"
+    version "0.1.0-2" upstream="0.1.0+git.cad6dc3764"
+    manifest "cps.kdl" sha256="e5f7572f6e0aa8df258399dd0b01da34c9e633630fe6fd0bee608f1066e1ebfd"
+    source "cps.tar.gz" size=915830 sha256="cc1d43437b53b28907e0c4cd413d1ec557bed4e9f992c411cf7001ce52b68b3a"
+    source "cps-vendor.tar.gz" size=55322030 sha256="b12b55d94b1e72877a2113a5501e5da7e89562fd30d254d91bf1623100fc1696"
     script """
     tar -xzf "$CPS_SOURCES/cps.tar.gz"
     tar -xzf "$CPS_SOURCES/cps-vendor.tar.gz"
@@ -32,6 +32,8 @@ build architecture="x86_64" epoch=1794315841 {
     install -Dm755 target/release/cps "$DESTDIR/usr/bin/cps"
     install -Dm644 packaging/systemd/cps-boot-health.service "$DESTDIR/usr/lib/systemd/system/cps-boot-health.service"
     install -Dm644 packaging/systemd/cps-uefi-bless.service "$DESTDIR/usr/lib/systemd/system/cps-uefi-bless.service"
+    install -Dm644 packaging/systemd/cps-finalize-trial.path "$DESTDIR/usr/lib/systemd/system/cps-finalize-trial.path"
+    install -Dm644 packaging/systemd/cps-finalize-trial.service "$DESTDIR/usr/lib/systemd/system/cps-finalize-trial.service"
     install -Dm644 LICENSE "$DESTDIR/usr/share/licenses/cps/LICENSE"
     """
 }
