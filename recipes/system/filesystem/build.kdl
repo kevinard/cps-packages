@@ -1,0 +1,17 @@
+schema-version 1 kind="build-recipe"
+// The directory layout every image starts from: merged /usr, os-release,
+// and tmpfiles rules for the /var skeleton. No package ships files in /var.
+build architecture="x86_64" epoch=1794268800 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-c"
+    }
+    version "1.0.0-1" upstream="1.0.0"
+    manifest "filesystem.kdl" sha256="b0a0ed1be5bacbe0e6143f352b6518df743cf728a7b9903b27fbad5d67cfdf43"
+    source "os-release" size=111 sha256="afce62a5796078ec3dc3f9ea7a0ab9b573a9c6464989795a8562dc42d99976ec"
+    source "canopa-filesystem.conf" size=415 sha256="0bdc48bf693473797f74920e0807fc0f81295a6636ff3b124784d6ef48994c82"
+    script """
+    install -Dm644 "$CPS_SOURCES/os-release" "$DESTDIR/usr/lib/os-release"
+    install -Dm644 "$CPS_SOURCES/canopa-filesystem.conf" "$DESTDIR/usr/lib/tmpfiles.d/canopa-filesystem.conf"
+    """
+}

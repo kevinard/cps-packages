@@ -1,0 +1,7 @@
+schema-version 1 kind="package-manifest"
+package "library/sqlite" publisher="canopa" summary="SQL database engine library" license="blessing" homepage="https://www.sqlite.org/" {
+    collect "usr/lib/libsqlite3.so*"
+    collect "usr/include/**"
+    collect "usr/lib/pkgconfig/*"
+    collect "usr/share/licenses/**"
+}

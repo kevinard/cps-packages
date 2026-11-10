@@ -1,0 +1,39 @@
+schema-version 1 kind="build-recipe"
+// Upstream's default program set, minus what Canopa takes from elsewhere
+// (kill from coreutils; login, su, runuser, and sulogin wait for PAM) and
+// what needs libraries not packaged yet (ncurses, libcap-ng, libsystemd).
+// mount and umount are setuid root and wall and write setgid tty (GID 5,
+// docs/uids.md) through the manifest, not through make install.
+build architecture="x86_64" epoch=1789987631 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-c"
+    }
+    version "2.42.4-2" upstream="2.42.4"
+    manifest "util-linux.kdl" sha256="524407fbdb1efb374016b64634dec335c63986f50e20154ebbcec42ccfaf5bd6"
+    discard "usr/lib/*.la"
+    source "util-linux-2.42.4.tar.xz" size=10729748 sha256="fbd62a100ab7bb8746ba0661255c3c48185b1e9021507c624da01fbc696330ec" url="https://cdn.kernel.org/pub/linux/utils/util-linux/v2.42/util-linux-2.42.4.tar.xz"
+    script """
+    tar -xJf "$CPS_SOURCES/util-linux-2.42.4.tar.xz"
+    cd util-linux-2.42.4
+    CFLAGS="-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=3" LDFLAGS="-Wl,-z,relro,-z,now" \\
+        ./configure --prefix=/usr --bindir=/usr/bin --sbindir=/usr/bin --libdir=/usr/lib \\
+        --libexecdir=/usr/libexec --runstatedir=/run --localstatedir=/var \\
+        --disable-static --disable-nls --disable-asciidoc --disable-poman --disable-bash-completion \\
+        --disable-makeinstall-chown --disable-makeinstall-setuid \\
+        --disable-kill --disable-login --disable-su --disable-runuser --disable-sulogin \\
+        --disable-chfn-chsh --disable-newgrp --disable-uuidd --disable-liblastlog2 --disable-pam-lastlog2 \\
+        --enable-write \\
+        --without-systemd --without-udev --without-python --without-ncurses --without-ncursesw \\
+        --without-tinfo --without-readline --without-cap-ng --without-libz --without-libmagic \\
+        --without-econf --without-selinux --without-audit --without-smack --without-cryptsetup
+    make
+    make DESTDIR="$DESTDIR" install
+    # A few programs use usrsbin_execdir, which --sbindir does not move.
+    mv "$DESTDIR"/usr/sbin/* "$DESTDIR/usr/bin/"
+    rmdir "$DESTDIR/usr/sbin"
+    for license in BSD-3-Clause GPL-2.0-or-later LGPL-2.1-or-later; do
+        install -Dm644 "Documentation/licenses/COPYING.$license" "$DESTDIR/usr/share/licenses/util-linux/$license.txt"
+    done
+    """
+}

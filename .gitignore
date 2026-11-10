@@ -1,0 +1,4 @@
+# Everything a build produces: the pinned cps binary, the stage0 seed,
+# throwaway keys, downloaded sources, staged recipes, bundles, the local
+# repository, and scratch images. Nothing in here is ever committed.
+/.cache/

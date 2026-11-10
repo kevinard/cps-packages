@@ -1,0 +1,31 @@
+schema-version 1 kind="package-manifest"
+package "system/filesystem" publisher="canopa" summary="Canopa OS directory layout, merged /usr links, and /var skeleton rules" license="CC0-1.0" homepage="https://github.com/kevinard/cps-packages" {
+    dir "boot" mode="0755" uid=0 gid=0
+    dir "dev" mode="0755" uid=0 gid=0
+    dir "etc" mode="0755" uid=0 gid=0
+    dir "home" mode="0755" uid=0 gid=0
+    dir "mnt" mode="0755" uid=0 gid=0
+    dir "opt" mode="0755" uid=0 gid=0
+    dir "proc" mode="0555" uid=0 gid=0
+    dir "root" mode="0700" uid=0 gid=0
+    dir "run" mode="0755" uid=0 gid=0
+    dir "srv" mode="0755" uid=0 gid=0
+    dir "sys" mode="0555" uid=0 gid=0
+    dir "tmp" mode="1777" uid=0 gid=0
+    dir "usr" mode="0755" uid=0 gid=0
+    dir "usr/bin" mode="0755" uid=0 gid=0
+    dir "usr/include" mode="0755" uid=0 gid=0
+    dir "usr/lib" mode="0755" uid=0 gid=0
+    dir "usr/libexec" mode="0755" uid=0 gid=0
+    dir "usr/share" mode="0755" uid=0 gid=0
+    symlink "bin" target="usr/bin" uid=0 gid=0
+    symlink "sbin" target="usr/bin" uid=0 gid=0
+    symlink "lib" target="usr/lib" uid=0 gid=0
+    symlink "lib64" target="usr/lib" uid=0 gid=0 arch="x86_64"
+    symlink "usr/sbin" target="bin" uid=0 gid=0
+    symlink "usr/lib64" target="lib" uid=0 gid=0 arch="x86_64"
+    file "usr/lib/os-release" mode="0644" uid=0 gid=0
+    symlink "etc/os-release" target="../usr/lib/os-release" uid=0 gid=0
+    file "usr/lib/tmpfiles.d/canopa-filesystem.conf" mode="0644" uid=0 gid=0
+    tmpfiles "canopa-filesystem.conf"
+}

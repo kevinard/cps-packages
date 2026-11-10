@@ -1,0 +1,15 @@
+schema-version 1 kind="package-manifest"
+package "system/util-linux" publisher="canopa" summary="Block device, mount, and system utilities with libblkid, libmount, libuuid, libfdisk, and libsmartcols" license="GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause" homepage="https://github.com/util-linux/util-linux" {
+    require "system/elf-runtime"
+    file "usr/bin/mount" mode="4755" uid=0 gid=0
+    file "usr/bin/umount" mode="4755" uid=0 gid=0
+    file "usr/bin/wall" mode="2755" uid=0 gid=5
+    file "usr/bin/write" mode="2755" uid=0 gid=5
+    collect "usr/bin/*"
+    collect "usr/lib/lib*.so*"
+    collect "usr/include/**"
+    collect "usr/lib/pkgconfig/*"
+    collect "usr/share/man/**"
+    collect "usr/share/doc/**"
+    collect "usr/share/licenses/**"
+}

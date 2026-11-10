@@ -1,0 +1,17 @@
+schema-version 1 kind="build-recipe"
+// TEMPLATE: the Canopa mirror's TUF root does not exist yet. Once the root
+// key ceremony produces tuf-root.json, check it in next to this file,
+// rename this file to build.kdl, and run tools/update-pins.sh. Until then
+// tools/build.sh skips it. The version revision follows the root's version.
+build architecture="x86_64" epoch=1794268800 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-c"
+    }
+    version "1.0.0-1" upstream="tuf-root-1"
+    manifest "canopa-trust.kdl" sha256="b064924c08f44f3830031bc9dd036dadf2ff258180861e05e665e745a7d3734b"
+    source "tuf-root.json" size=@ROOT_SIZE@ sha256="@ROOT_SHA256@"
+    script """
+    install -Dm644 "$CPS_SOURCES/tuf-root.json" "$DESTDIR/etc/cps/tuf-root.json"
+    """
+}

@@ -1,0 +1,37 @@
+schema-version 1 kind="build-recipe"
+// CPS from the commit in cps.pin. The toolchain takes SQLite and libseccomp
+// from canopa, so this recipe builds after them and pins both catalogs.
+build architecture="x86_64" epoch=1794315841 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        publisher "canopa" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-rust"
+        package "library/sqlite"
+        package "library/libseccomp"
+    }
+    version "0.1.0-1" upstream="0.1.0+git.fb3e088436"
+    manifest "cps.kdl" sha256="5777fc819a9f36283ab375d4aead32c8dc1d4941bad3b2f80a5329542fe8f8fa"
+    source "cps.tar.gz" size=888477 sha256="06ba5d2b6c4cf78eca47572670f0508cb1e4ab7b6acabc4df36bfa343b9a3d27"
+    source "cps-vendor.tar.gz" size=55327669 sha256="a0bb4af5a3cfd7d70bb538d0514afe1fd0e97cbcbacc4bd53fc698d21e422792"
+    script """
+    tar -xzf "$CPS_SOURCES/cps.tar.gz"
+    tar -xzf "$CPS_SOURCES/cps-vendor.tar.gz"
+    cd cps
+    test -f /usr/include/sqlite3.h
+    test -f /usr/include/seccomp.h
+    export CARGO_HOME=/build/cargo-home CARGO_INCREMENTAL=0 CARGO_PROFILE_RELEASE_STRIP=symbols
+    export RUSTFLAGS=--remap-path-prefix=/build=/usr/src AWS_LC_SYS_CMAKE_BUILDER=0
+    mkdir -p "$CARGO_HOME"
+    cat > "$CARGO_HOME/config.toml" <<'CONFIG'
+    [source.crates-io]
+    replace-with = "vendor"
+    [source.vendor]
+    directory = "/build/vendor"
+    CONFIG
+    cargo build --frozen --release --jobs "$CPS_BUILD_JOBS" --bin cps
+    install -Dm755 target/release/cps "$DESTDIR/usr/bin/cps"
+    install -Dm644 packaging/systemd/cps-boot-health.service "$DESTDIR/usr/lib/systemd/system/cps-boot-health.service"
+    install -Dm644 packaging/systemd/cps-uefi-bless.service "$DESTDIR/usr/lib/systemd/system/cps-uefi-bless.service"
+    install -Dm644 LICENSE "$DESTDIR/usr/share/licenses/cps/LICENSE"
+    """
+}

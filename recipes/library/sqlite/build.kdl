@@ -1,0 +1,33 @@
+schema-version 1 kind="build-recipe"
+build architecture="x86_64" epoch=1791504000 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-c"
+    }
+    version "3.54.1-1" upstream="3.54.1"
+    manifest "sqlite.kdl" sha256="a9735c1a2b1cf02431b28831128fe66556d295755ebf150bb85284894f83208b"
+    source "sqlite-autoconf-3540100.tar.gz" size=3332984 sha256="926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e" url="https://www.sqlite.org/2026/sqlite-autoconf-3540100.tar.gz"
+    script """
+    tar -xzf "$CPS_SOURCES/sqlite-autoconf-3540100.tar.gz"
+    cd sqlite-autoconf-3540100
+    cc -O2 -fPIC -shared -Wl,-soname,libsqlite3.so.0 -Wl,-z,relro,-z,now \\
+        -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_RTREE \\
+        sqlite3.c -lm -ldl -pthread -o libsqlite3.so.0
+    install -Dm755 libsqlite3.so.0 "$DESTDIR/usr/lib/libsqlite3.so.0"
+    ln -s libsqlite3.so.0 "$DESTDIR/usr/lib/libsqlite3.so"
+    install -Dm644 sqlite3.h "$DESTDIR/usr/include/sqlite3.h"
+    install -Dm644 sqlite3ext.h "$DESTDIR/usr/include/sqlite3ext.h"
+    sed -e 's|@prefix@|/usr|g' -e 's|@exec_prefix@|${prefix}|g' \\
+        -e 's|@libdir@|${exec_prefix}/lib|g' -e 's|@includedir@|${prefix}/include|g' \\
+        -e 's/@PACKAGE_VERSION@/3.54.1/g' \\
+        -e 's/@LDFLAGS_MATH@/-lm/g' -e 's/@LDFLAGS_DLOPEN@/-ldl/g' -e 's/@LDFLAGS_PTHREAD@/-pthread/g' \\
+        -e 's/@LDFLAGS_ZLIB@//g' -e 's/@LDFLAGS_ICU@//g' sqlite3.pc.in > sqlite3.pc
+    install -Dm644 sqlite3.pc "$DESTDIR/usr/lib/pkgconfig/sqlite3.pc"
+    install -Dm644 /dev/stdin "$DESTDIR/usr/share/licenses/sqlite/LICENSE" <<'LICENSE'
+    The author disclaims copyright to this source code. In place of a legal
+    notice, here is a blessing: May you do good and not evil. May you find
+    forgiveness for yourself and forgive others. May you share freely, never
+    taking more than you give.
+    LICENSE
+    """
+}

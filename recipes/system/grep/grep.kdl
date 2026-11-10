@@ -1,0 +1,8 @@
+schema-version 1 kind="package-manifest"
+package "system/grep" publisher="canopa" summary="GNU pattern matching utility" license="GPL-3.0-or-later" homepage="https://www.gnu.org/software/grep/" {
+    require "system/elf-runtime"
+    collect "usr/bin/grep"
+    collect "usr/share/man/**"
+    collect "usr/share/info/**"
+    collect "usr/share/licenses/**"
+}

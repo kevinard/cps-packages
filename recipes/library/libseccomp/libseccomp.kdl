@@ -1,0 +1,7 @@
+schema-version 1 kind="package-manifest"
+package "library/libseccomp" publisher="canopa" summary="Enhanced seccomp filter library" license="LGPL-2.1-only" homepage="https://github.com/seccomp/libseccomp" {
+    collect "usr/lib/libseccomp.so*"
+    collect "usr/include/**"
+    collect "usr/lib/pkgconfig/*"
+    collect "usr/share/licenses/**"
+}

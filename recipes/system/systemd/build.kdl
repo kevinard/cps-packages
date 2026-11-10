@@ -1,0 +1,38 @@
+schema-version 1 kind="build-recipe"
+// systemd with the features its packaged dependencies allow: libblkid and
+// libmount from util-linux, seccomp, EFI and systemd-boot. Other optional
+// features stay off until their libraries have recipes (docs/bootstrap.md).
+// Nothing is installed in /etc or /var: -Dinstall-sysconfdir=false and
+// -Dcreate-log-dirs=false; tmpfiles.d creates /var state at boot.
+build architecture="x86_64" epoch=1792187472 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        publisher "canopa" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-meson"
+        package "system/util-linux"
+        package "library/libseccomp"
+    }
+    version "262.1.0-2" upstream="262.1"
+    manifest "systemd.kdl" sha256="5eb8821aeb9157aafc4499a4aed770a70c417bda1aabeb0a4abe0c8564b8a315"
+    source "systemd-262.1.tar.gz" size=19088198 sha256="100fc873b848b9b0297d8a705e8e2ed326256c8483d9960ee1ffe264c8a5c3e3" url="https://codeload.github.com/systemd/systemd/tar.gz/refs/tags/v262.1"
+    source "0001-core-set-RUNPATH-on-libsystemd-core.patch" size=871 sha256="49899fb634f6c6659eacdd5db363a897d4e27c2638816602450d84ddffec7926"
+    script """
+    tar -xzf "$CPS_SOURCES/systemd-262.1.tar.gz"
+    cd systemd-262.1
+    patch --batch --forward --fuzz=0 -p1 -i "$CPS_SOURCES/0001-core-set-RUNPATH-on-libsystemd-core.patch"
+    export PYTHONHASHSEED=0 PYTHONDONTWRITEBYTECODE=1
+    meson setup out --prefix=/usr --libdir=lib --wrap-mode=nodownload --buildtype=release \\
+        -Dmode=release -Dsplit-bin=false -Dvcs-tag=false -Dversion-tag=v262.1 -Dtests=false -Dinstall-tests=false \\
+        -Dauto_features=disabled -Dblkid=enabled -Dlibmount=enabled -Dseccomp=enabled \\
+        -Defi=true -Dbootloader=enabled -Dkernel-install=true -Dldconfig=false \\
+        -Dinstall-sysconfdir=false -Dcreate-log-dirs=false \\
+        -Dsystem-uid-max=999 -Dsystem-gid-max=999 -Dtty-gid=5 -Dusers-gid=100 \\
+        -Dnobody-user=nobody -Dnobody-group=nobody \\
+        -Dsbat-distro=canopa -Dsbat-distro-summary="Canopa OS" -Dsbat-distro-pkgname=systemd \\
+        -Dsbat-distro-version=262.1.0-2 -Dsbat-distro-url=https://github.com/kevinard/cps-packages
+    ninja -C out -j "$CPS_BUILD_JOBS"
+    DESTDIR="$DESTDIR" meson install -C out --no-rebuild --quiet
+    install -Dm644 LICENSE.LGPL2.1 "$DESTDIR/usr/share/licenses/systemd/LICENSE.LGPL2.1"
+    install -Dm644 LICENSE.GPL2 "$DESTDIR/usr/share/licenses/systemd/LICENSE.GPL2"
+    """
+}

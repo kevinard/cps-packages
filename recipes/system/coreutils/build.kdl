@@ -1,0 +1,24 @@
+schema-version 1 kind="build-recipe"
+// One multi-call binary with symlinks. kill, hostname, and uptime come from
+// here, so system/util-linux disables its kill.
+build architecture="x86_64" epoch=1789400270 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-c"
+    }
+    version "9.12.0-1" upstream="9.12"
+    manifest "coreutils.kdl" sha256="ac57762dc09215afab7a2944bc43f34bfe1e0391519f539e493ec3d5c19641b3"
+    source "coreutils-9.12.tar.xz" size=6704996 sha256="a480198559733e9b3da999e90543ac6f888a2caa544d8d664c5a1f17e528e210" url="https://ftp.gnu.org/gnu/coreutils/coreutils-9.12.tar.xz"
+    script """
+    tar -xJf "$CPS_SOURCES/coreutils-9.12.tar.xz"
+    cd coreutils-9.12
+    CFLAGS="-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=3" LDFLAGS="-Wl,-z,relro,-z,now" \\
+        FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --libexecdir=/usr/libexec \\
+        --enable-single-binary=symlinks --enable-install-program=arch,hostname,kill,uptime \\
+        --disable-nls --disable-acl --disable-libcap --without-libsmack --without-selinux \\
+        --without-openssl --without-libgmp --without-systemd --without-wtmpdb
+    make all
+    make DESTDIR="$DESTDIR" install-exec install-man
+    install -Dm644 COPYING "$DESTDIR/usr/share/licenses/coreutils/COPYING"
+    """
+}

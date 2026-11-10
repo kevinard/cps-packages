@@ -1,0 +1,22 @@
+core: give libsystemd-core the RUNPATH that systemd's executables have
+
+libsystemd-core-NNN.so needs libsystemd-shared-NNN.so from
+/usr/lib/systemd but has no DT_RUNPATH. It still loads, because
+/usr/lib/systemd/systemd loads the shared library first, but the
+library's own dependency is unresolved on its face, so CPS's generated
+library dependencies require a cap/elf/.../libsystemd-shared-NNN.so
+capability that nothing provides. Linking it with the same install_rpath
+as the executables makes the dependency resolve inside the package.
+
+Not upstream. Canopa-specific packaging fix.
+
+--- a/src/core/meson.build
++++ b/src/core/meson.build
+@@ -197,6 +197,7 @@
+         link_depends : libshared_sym_path,
+         link_whole: libcore_static,
+         link_with : libshared,
++        install_rpath : pkglibdir,
+         install : true,
+         install_dir : pkglibdir)
+ 

@@ -1,0 +1,4 @@
+schema-version 1 kind="package-manifest"
+package "system/canopa-trust" publisher="canopa" summary="TUF root metadata of the Canopa package mirror" license="CC0-1.0" homepage="https://github.com/kevinard/cps-packages" {
+    file "etc/cps/tuf-root.json" mode="0644" uid=0 gid=0
+}

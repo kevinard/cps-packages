@@ -1,0 +1,18 @@
+schema-version 1 kind="build-recipe"
+// Stage 0 only: copies the seed's own glibc and libgcc runtime, byte for
+// byte, so images can run what the seed compiled. Stage 1 replaces this
+// recipe with system/glibc and system/gcc-libs built from source.
+build architecture="x86_64" epoch=1794268800 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-c"
+    }
+    version "1.0.0-1" upstream="stage0"
+    manifest "elf-runtime.kdl" sha256="054df4f27dc74946929b3122f10a48da1650b6cda371bcdde3138c85169cf0a6"
+    strip #false
+    script """
+    for library in ld-linux-x86-64.so.2 libc.so.6 libm.so.6 libgcc_s.so.1; do
+        install -Dm755 "/usr/lib/$library" "$DESTDIR/usr/lib/$library"
+    done
+    """
+}

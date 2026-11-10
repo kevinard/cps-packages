@@ -1,0 +1,7 @@
+schema-version 1 kind="package-manifest"
+package "system/kernel" publisher="canopa" summary="Linux kernel and modules" license="GPL-2.0-only" homepage="https://www.kernel.org/" {
+    file "usr/lib/modules/6.12.115-canopa/vmlinuz" mode="0644" uid=0 gid=0 arch="x86_64"
+    collect "usr/lib/modules/6.12.115-canopa/**" arch="x86_64"
+    collect "usr/share/licenses/**"
+    kernel-install "6.12.115-canopa"
+}

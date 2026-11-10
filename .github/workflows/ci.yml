@@ -1,0 +1,30 @@
+# Pin and policy checks only; nothing is built or published here.
+#
+# This workflow has never run on GitHub. It needs the commit in cps.pin to
+# be fetchable from CPS_URL, which is not true while that commit only
+# exists on an unpushed CPS branch.
+name: checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  pins:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install build dependencies of CPS
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libsqlite3-dev libseccomp-dev pkg-config
+      - name: Cache the pinned CPS build
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .cache/cps
+          key: cps-${{ hashFiles('cps.pin') }}
+      - name: Build the pinned CPS
+        run: tools/cps.sh
+      - name: Check pins, build order, and policy
+        run: tools/check.sh

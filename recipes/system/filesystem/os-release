@@ -1,0 +1,5 @@
+NAME="Canopa OS"
+ID=canopa
+PRETTY_NAME="Canopa OS"
+BUILD_ID=rolling
+HOME_URL="https://github.com/kevinard/cps"

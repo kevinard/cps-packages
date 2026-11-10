@@ -1,0 +1,19 @@
+schema-version 1 kind="package-manifest"
+package "system/systemd" publisher="canopa" summary="System and service manager, udev, systemd-boot, and kernel-install" license="LGPL-2.1-or-later AND GPL-2.0-or-later" homepage="https://systemd.io/" {
+    require "system/elf-runtime"
+    require "system/util-linux"
+    require "library/libseccomp" version=">=2.6.1-1"
+    dir "etc/udev" mode="0755" uid=0 gid=0
+    file "usr/lib/sysusers.d/basic.conf" mode="0644" uid=0 gid=0
+    file "usr/bin/systemd-hwdb" mode="0755" uid=0 gid=0
+    collect "usr/bin/*"
+    collect "usr/lib/**"
+    collect "usr/include/**"
+    collect "usr/share/**"
+    sysusers "basic.conf"
+    trigger "hwdb" {
+        run "usr/bin/systemd-hwdb" "--strict" "update"
+        watch "usr/lib/udev/hwdb.d/*.hwdb"
+        output "etc/udev/hwdb.bin"
+    }
+}

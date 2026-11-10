@@ -1,0 +1,39 @@
+schema-version 1 kind="build-recipe"
+// A full defconfig BusyBox with the settings in busybox.config. Only the
+// binary and the mediated /usr/bin/sh link are installed: GNU coreutils,
+// grep, and util-linux own the other commands. `busybox --install -s DIR`
+// creates applet links where a rescue environment wants them.
+build architecture="x86_64" epoch=1778641860 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-c"
+    }
+    version "1.38.0-2" upstream="1.38.0"
+    manifest "busybox.kdl" sha256="b1b323da140b804eeba5dd6a3f401a3c42e65431258543887a0d6cefa05263cc"
+    source "busybox-1.38.0.tar.bz2" size=2695723 sha256="34f9ea6ff8636f2c9241153b9114eefa9e65674a45318ae1ef95bb5f31c53bb2" url="https://busybox.net/downloads/busybox-1.38.0.tar.bz2"
+    source "busybox.config" size=846 sha256="423e9a86b4f9ee5d80d17c4949016e9bfd4e8559cfc520c0e218f1139cc24ce7"
+    source "CVE-2026-38754.patch" size=1844 sha256="42e072567b70fba049ef36946b85462f2725d22668f0007f8d056314f84a263e"
+    source "CVE-2026-38755.patch" size=1665 sha256="fa9cf8d6abd547a7bbeecf77f79fc260cdce3a8902d7f82a7f127aabb8dccb60"
+    script """
+    tar -xjf "$CPS_SOURCES/busybox-1.38.0.tar.bz2"
+    cd busybox-1.38.0
+    for patch in CVE-2026-38754 CVE-2026-38755; do
+        patch --batch --forward --fuzz=0 -p1 -i "$CPS_SOURCES/$patch.patch"
+    done
+    settings="$CPS_SOURCES/busybox.config"
+    make -s defconfig >/dev/null
+    grep -E '^(CONFIG_|# CONFIG_)' "$settings" | while IFS= read -r line; do
+        symbol=$(printf '%s\\n' "$line" | sed -E 's/^# (CONFIG_[A-Z0-9_]+) is not set$/\\1/; s/=.*//')
+        sed -i "/^# $symbol is not set$/d; /^$symbol=/d" .config
+        printf '%s\\n' "$line" >> .config
+    done
+    yes "" | make -s oldconfig >/dev/null
+    grep -E '^(CONFIG_|# CONFIG_)' "$settings" | while IFS= read -r line; do
+        grep -Fxq "$line" .config || { echo "BusyBox configuration dropped: $line" >&2; exit 1; }
+    done
+    make -s busybox
+    install -Dm755 busybox "$DESTDIR/usr/bin/busybox"
+    ln -s busybox "$DESTDIR/usr/bin/sh"
+    install -Dm644 LICENSE "$DESTDIR/usr/share/licenses/busybox/LICENSE"
+    """
+}

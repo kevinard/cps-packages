@@ -1,0 +1,35 @@
+schema-version 1 kind="build-recipe"
+// A general x86_64 kernel: upstream x86_64_defconfig plus canopa.config.
+// Modules are installed under /usr/lib/modules with their depmod indexes.
+build architecture="x86_64" epoch=1793361987 {
+    toolchain solver="sat-v2" {
+        publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
+        package "build/seed-kernel"
+    }
+    version "6.12.115-1" upstream="6.12.115"
+    manifest "kernel.kdl" sha256="2b510d845c59d1a5ac5e384920ac6aecc75bd958c384b3e55500716ca1b02062"
+    source "linux-6.12.115.tar.xz" size=148760708 sha256="0ec90fe4b20422b1b664b77e6d2dde22b40bd41e7eb2cad8ac8739a4749cb1bb" url="https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.115.tar.xz"
+    source "canopa.config" size=1097 sha256="e37bc7ca086cc639b8c986880c17b8d69f64d4467f57237b585c63f7d32e4dc6"
+    script """
+    tar -xf "$CPS_SOURCES/linux-6.12.115.tar.xz"
+    cd linux-6.12.115
+    export ARCH=x86_64 KBUILD_BUILD_USER=canopa KBUILD_BUILD_HOST=build KBUILD_BUILD_VERSION=1
+    export KBUILD_BUILD_TIMESTAMP="$(date -u -d "@$SOURCE_DATE_EPOCH" '+%a %b %d %T UTC %Y')"
+    make x86_64_defconfig
+    scripts/kconfig/merge_config.sh -m .config "$CPS_SOURCES/canopa.config"
+    make olddefconfig
+    grep -E '^(CONFIG_|# CONFIG_)' "$CPS_SOURCES/canopa.config" | while IFS= read -r setting; do
+        grep -Fxq "$setting" .config || { echo "Kernel configuration dropped $setting" >&2; exit 1; }
+    done
+    release=$(make -s kernelrelease)
+    test "$release" = 6.12.115-canopa
+    make bzImage modules
+    modules="$DESTDIR/usr/lib/modules/$release"
+    make INSTALL_MOD_PATH="$DESTDIR/usr" INSTALL_MOD_STRIP=1 DEPMOD=/usr/bin/depmod modules_install
+    rm -f "$modules/build"
+    install -Dm644 arch/x86/boot/bzImage "$modules/vmlinuz"
+    install -Dm644 .config "$modules/config"
+    install -Dm644 System.map "$modules/System.map"
+    install -Dm644 LICENSES/preferred/GPL-2.0 "$DESTDIR/usr/share/licenses/kernel/GPL-2.0"
+    """
+}
