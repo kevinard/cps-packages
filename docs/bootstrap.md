@@ -93,9 +93,11 @@ change.
   port needs either per-architecture recipes or a way to instantiate one
   recipe per architecture.
 - `system/canopa-trust` waits for the mirror's TUF root ceremony.
-- `cps verify --pristine` reports the `/var` state that a package's
-  declared `tmpfiles` rules created at install time (for example
-  `system/filesystem`'s `/var/tmp`) as unmanaged paths. `tools/image.sh`
-  accepts unmanaged paths under `var/` and fails on any other. The CPS
-  `/var` enforcement work should decide whether pristine verification
-  skips `/var` or tmpfiles-created paths.
+- `cps verify --pristine` reports what declared systemd actions created at
+  install time as unmanaged paths: the `/var` state of `tmpfiles` rules
+  (`system/filesystem`'s `/var/tmp`, …) and the account databases that
+  `sysusers` writes (`/etc/passwd`, `/etc/group`, `/etc/shadow`,
+  `/etc/gshadow`, `/etc/.pwd.lock`, from `system/systemd`'s `basic.conf`).
+  `tools/image.sh` accepts exactly those and fails on any other unmanaged
+  path. CPS should decide, with its `/var` enforcement work, whether
+  pristine verification excludes the outputs of declared actions.

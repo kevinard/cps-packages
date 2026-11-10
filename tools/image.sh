@@ -45,16 +45,18 @@ fi
 "$cps" plan --root "$root" --output "$root.plan.json" install "${packages[@]}"
 "${as_root[@]}" "$cps" apply --root "$root" "$root.plan.json"
 "${as_root[@]}" "$cps" verify --root "$root"
-# --pristine also reports unmanaged paths. Under var/ those are the state
-# that declared tmpfiles rules created, which is expected (see
-# docs/bootstrap.md, open issues); anything else is a failure.
+# --pristine also reports unmanaged paths. Declared systemd actions create
+# some by design: tmpfiles state under var/ and the account databases that
+# sysusers writes in etc/. Those are expected (see docs/bootstrap.md, open
+# issues); any other unmanaged path is a failure.
+action_state='^error: unmanaged path "(var/|etc/(passwd|group|shadow|gshadow|\.pwd\.lock)")'
 if ! pristine=$("${as_root[@]}" "$cps" verify --root "$root" --pristine 2>&1); then
-    unexpected=$(grep -v '^error: unmanaged path "var/' <<< "$pristine" || true)
+    unexpected=$(grep -Ev "$action_state" <<< "$pristine" || true)
     if [[ -n $unexpected ]]; then
         printf '%s\n' "$unexpected" >&2
         die 'pristine verification failed'
     fi
-    note "pristine verification: only tmpfiles-created state under /var is unmanaged ($(grep -c '^error: unmanaged path "var/' <<< "$pristine") path(s))"
+    note "pristine verification: only state from tmpfiles and sysusers actions is unmanaged ($(grep -Ec "$action_state" <<< "$pristine") path(s))"
 fi
 "$cps" list --root "$root"
 note "installed and verified ${#packages[@]} package(s) in ${root#"$top"/}"
