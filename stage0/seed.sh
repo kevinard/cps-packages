@@ -267,6 +267,12 @@ for path in usr/include/{gelf,libelf}.h usr/lib/{libelf.so.1,pkgconfig/libelf.pc
     copy_file "$work/full-seed-kernel" "/$path" "$path"
 done
 ln -s libelf.so.1 "$work/full-seed-kernel/usr/lib/libelf.so"
+# certs/extract-cert and module signing build against libcrypto, whose
+# library build/seed-c already ships.
+while IFS= read -r path; do
+    copy_file "$work/full-seed-kernel" "$path" "${path#/}"
+done < <(pacman -Qlq openssl | awk '/^\/usr\/include\/openssl\/.*[^\/]$/ || /^\/usr\/lib\/pkgconfig\/libcrypto\.pc$/')
+ln -s libcrypto.so.3 "$work/full-seed-kernel/usr/lib/libcrypto.so"
 mkdir -p -- "$work/full-seed-kernel/usr/share"
 cp -RL -- /usr/share/bison "$work/full-seed-kernel/usr/share/"
 # perl needs its own library tree.

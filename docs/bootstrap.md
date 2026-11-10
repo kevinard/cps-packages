@@ -22,7 +22,7 @@ packages:
 | `build/seed-c` | gcc, binutils, make, bash as `/bin/sh`, coreutils, sed, grep, awk, tar and compressors, patch, pkg-config, glibc headers and static archives |
 | `build/seed-rust` | rustc, cargo, and the host's Rust standard library (for `system/cps`) |
 | `build/seed-meson` | Python, Meson, Ninja, gperf, Jinja2, pyelftools (for `system/systemd`) |
-| `build/seed-kernel` | bison, flex, bc, perl, cpio, libelf, kmod (for `system/kernel`) |
+| `build/seed-kernel` | bison, flex, bc, perl, cpio, kmod, and the libelf and OpenSSL headers (for `system/kernel`) |
 
 Each layer ships only the paths `build/seed-c` and `system/elf-runtime` do
 not, and requires `build/seed-c`, so a recipe asks for exactly the tools it
