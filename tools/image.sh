@@ -48,18 +48,9 @@ fi
 "${as_root[@]}" "$cps" plan --root "$root" --output "$root.plan.json" install "${packages[@]}"
 "${as_root[@]}" "$cps" apply --root "$root" "$root.plan.json"
 "${as_root[@]}" "$cps" verify --root "$root"
-# --pristine also reports unmanaged paths. The account databases that the
-# declared sysusers actions write in etc/ are expected (see docs/bootstrap.md,
-# open issues); any other unmanaged path is a failure. tmpfiles rules for
-# /var run at boot, so an offline image leaves var/ empty.
-action_state='^error: unmanaged path "etc/(passwd|group|shadow|gshadow|\.pwd\.lock)"'
-if ! pristine=$("${as_root[@]}" "$cps" verify --root "$root" --pristine 2>&1); then
-    unexpected=$(grep -Ev "$action_state" <<< "$pristine" || true)
-    if [[ -n $unexpected ]]; then
-        printf '%s\n' "$unexpected" >&2
-        die 'pristine verification failed'
-    fi
-    note "pristine verification: only the account databases from sysusers actions are unmanaged ($(grep -Ec "$action_state" <<< "$pristine") path(s))"
-fi
+# --pristine also reports unmanaged paths. It expects the account databases
+# and other state that the packages' systemd actions write; tmpfiles rules
+# for /var run at boot, so an offline image leaves var/ empty.
+"${as_root[@]}" "$cps" verify --root "$root" --pristine
 "${as_root[@]}" "$cps" list --root "$root"
 note "installed and verified ${#packages[@]} package(s) in ${root#"$top"/}"
