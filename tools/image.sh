@@ -43,10 +43,9 @@ fi
 # Every command runs in the namespace, so the image owner recorded at
 # creation is the same root that owns the packaged usr/ directories above
 # the image state in usr/lib/sysimage/cps.
-"${as_root[@]}" "$cps" image-create --root "$root" --repo "$repo" --publisher canopa \
+"${as_root[@]}" "$cps" image create --root "$root" --repo "$repo" \
     --trust-root "$cache/keys/canopa.trust.json"
-"${as_root[@]}" "$cps" plan --root "$root" --output "$root.plan.json" install "${packages[@]}"
-"${as_root[@]}" "$cps" apply --root "$root" "$root.plan.json"
+"${as_root[@]}" "$cps" install --root "$root" -y "${packages[@]}"
 "${as_root[@]}" "$cps" verify --root "$root"
 # --pristine also reports unmanaged paths. It expects the account databases
 # and other state that the packages' systemd actions write; tmpfiles rules

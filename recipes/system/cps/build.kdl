@@ -1,7 +1,7 @@
 schema-version 1 kind="build-recipe"
 // CPS from the commit in cps.pin. The toolchain takes SQLite and libseccomp
 // from canopa, so this recipe builds after them and pins both catalogs.
-build architecture="x86_64" epoch=1794346146 {
+build architecture="x86_64" epoch=1794358998 {
     toolchain solver="sat-v2" {
         publisher "seed" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
         publisher "canopa" catalog="0000000000000000000000000000000000000000000000000000000000000000" key-sha256="0000000000000000000000000000000000000000000000000000000000000000"
@@ -9,10 +9,10 @@ build architecture="x86_64" epoch=1794346146 {
         package "library/sqlite"
         package "library/libseccomp"
     }
-    version "0.1.0-3" upstream="0.1.0+git.b233062130"
+    version "0.1.0-4" upstream="0.1.0+git.1de46cab18"
     manifest "cps.kdl" sha256="e5f7572f6e0aa8df258399dd0b01da34c9e633630fe6fd0bee608f1066e1ebfd"
-    source "cps.tar.gz" size=920948 sha256="8534f1d5eb53e77f73c2e84fc0e97b78778428a2f1332605d5e2717598f46b47"
-    source "cps-vendor.tar.gz" size=55673460 sha256="46bbcaa278d51e32e13dbafb6b030545a6b5ca509b2a1ef18e2cc7b443365580"
+    source "cps.tar.gz" size=921914 sha256="fe3a0743d47d3645e0d9d6be4bf647911ab4199884ed59f73a352d8d765dac01"
+    source "cps-vendor.tar.gz" size=55667892 sha256="ea04c091811caef75948fd8e369489fc9e769ad25b0d732b2f721ad392937052"
     script """
     tar -xzf "$CPS_SOURCES/cps.tar.gz"
     tar -xzf "$CPS_SOURCES/cps-vendor.tar.gz"

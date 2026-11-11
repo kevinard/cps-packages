@@ -4,7 +4,7 @@
 #   1. every manifest pin and every pin of a checked-in source is current
 #      (cps recipe repin --check), and with --distfiles also the pins of
 #      downloaded sources in .cache/distfiles;
-#   2. the tree has a build order (cps build-order);
+#   2. the tree has a build order (cps recipe order);
 #   3. tools/lint.sh: no package content under /var, owners from docs/uids.md,
 #      recipe layout and naming.
 #
@@ -23,7 +23,7 @@ fi
 note 'checking recipe pins'
 "$cps" recipe repin --check --manifests --local-sources "${sources[@]}" recipes
 note 'checking the build order'
-"$cps" build-order --explain recipes > /dev/null
+"$cps" recipe order --explain recipes > /dev/null
 note 'linting recipes'
 "$top/tools/lint.sh"
 note 'all checks passed'

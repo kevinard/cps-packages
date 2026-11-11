@@ -17,7 +17,7 @@ cps=$(cps_binary)
 distfiles=$cache/distfiles
 mkdir -p -- "$distfiles"
 
-mapfile -t recipes < <("$cps" build-order "$@" 2>/dev/null)
+mapfile -t recipes < <("$cps" recipe order "$@" 2>/dev/null)
 for recipe in "${recipes[@]}"; do
     [[ $recipe == *.in ]] && continue
     dir=$(dirname -- "$recipe")

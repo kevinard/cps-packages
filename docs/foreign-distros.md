@@ -31,7 +31,7 @@ again after a bump.
 
 Boot environments, trial boots, and rollback assume what Canopa assumes: a
 Btrfs root with `/var` on its own subvolume, UEFI, and systemd-boot. CPS can
-manage a plain image directory (`cps image-create --root DIR`) on any
+manage a plain image directory (`cps image create --root DIR`) on any
 filesystem, which is how `tools/image.sh` tests packages here.
 
 ## Running CPS as an unprivileged user

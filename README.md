@@ -25,7 +25,7 @@ Packages never ship files under `/var`.
 Categories: `system/` (the base OS), `library/` (shared libraries),
 `devel/` (compilers and build tools), `build/` (toolchain bundles that only
 recipes request), and `apps/` (everything else). Recipes are found by
-`cps build-order`, so the layout needs no index file.
+`cps recipe order`, so the layout needs no index file.
 
 Why one directory per recipe: a recipe and the files it pins by digest
 (templates, patches, config fragments) change together, and one directory
@@ -54,10 +54,10 @@ tools/check.sh                     # what CI checks: pins, build order, lint
 3. It creates throwaway keys in `.cache/keys/` on first run: the seed key,
    the `canopa` release key, and a builder key.
 4. It stages `recipes/` in `.cache/work/recipes`, and for each recipe in
-   `cps build-order` order sets the toolchain pins to the local seed and
+   `cps recipe order` order sets the toolchain pins to the local seed and
    canopa catalogs with `cps recipe repin`, fetches sources, runs
    `cps build --check-reproducible` with a signed attestation, approves the
-   recipe digest in the local publish policy, and runs `cps publish-bundle`.
+   recipe digest in the local publish policy, and runs `cps publish bundle`.
 
 Rerunning it skips recipes whose staged digest was already published. Name
 recipes to build only those, as in `tools/build.sh library/sqlite`.

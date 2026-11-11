@@ -70,7 +70,7 @@ toolchain itself is built by CPS from pinned sources.
 5. Rebuild every recipe against `build/base` instead of `build/seed-*`.
 
 Cycles appear at this point (gcc needs glibc headers, glibc needs gcc;
-util-linux can use libsystemd, systemd needs libmount). `cps build-order`
+util-linux can use libsystemd, systemd needs libmount). `cps recipe order`
 reports them; break each by building the first side against the previous
 stage's catalog, which is what the seed is for.
 

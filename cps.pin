@@ -3,6 +3,6 @@
 # recipes track one commit and bump it deliberately; see CONTRIBUTING.md.
 #
 # Read by tools/cps.sh (POSIX sh: KEY=value, no spaces around "=").
-CPS_COMMIT=b23306213033fa78159b4faf73975ced47b41f40
+CPS_COMMIT=1de46cab187690a73093cd59816c9a7e2552ffc7
 # Default source for tools/cps.sh; override with CPS_SOURCE=PATH-or-URL.
 CPS_URL=https://github.com/kevinard/cps.git

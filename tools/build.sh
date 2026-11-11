@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the recipe tree end to end into a local, signed repository:
 #
-#   stage0 seed -> cps build-order -> repin -> cps build -> cps publish-bundle
+#   stage0 seed -> cps recipe order -> repin -> cps build -> cps publish bundle
 #
 # usage: tools/build.sh [--reseed] [--keep-going] [CATEGORY/NAME...]
 #
@@ -95,7 +95,7 @@ work=$cache/work/recipes
 rm -rf -- "$work"
 mkdir -p -- "$cache/work" "$cache/bundles" "$cache/logs" "$cache/sources"
 cp -a -- "$top/recipes" "$work"
-mapfile -t order < <("$cps" build-order "$work")
+mapfile -t order < <("$cps" recipe order "$work")
 
 # The pinned source names of a recipe.
 source_names() {
@@ -157,7 +157,7 @@ build_one() {
     rm -rf -- "$staging"
     rm -rf -- "$bundle" "$bundle.published"
     if ! "$cps" build --toolchain-config "$(toolchain_config "$recipe")" --source-cache "$cache/sources" \
-        --output "$bundle" --check-reproducible --builder-signing-key "$keys/builder.der" \
+        --output "$bundle" --check-reproducible --key "$keys/builder.der" \
         "$recipe" >> "$log" 2>&1; then
         note "build failed for $dir; last lines of $log:"
         tail -n 25 -- "$log" >&2
@@ -176,7 +176,7 @@ build_one() {
         [[ -n $name && -n $version ]] || die "cannot read the package of $manifest"
         approve "$name" "$version" "$sha"
     done < <(find "$bundle/manifests" -name '*.kdl' -print0)
-    if ! "$cps" publish-bundle --repo "$repo" --signing-key "$keys/canopa.der" \
+    if ! "$cps" publish bundle --repo "$repo" --key "$keys/canopa.der" \
         --builder-key "$keys/builder-public.der" --recipe-sha256 "$sha" \
         --source-cache "$cache/sources" "$bundle" >> "$log" 2>&1; then
         note "publication failed for $dir; last lines of $log:"

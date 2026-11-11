@@ -292,14 +292,14 @@ publish() {
     local name=$1 proto=$2
     shift 2
     "$cps" manifest generate --proto "$proto" --publisher seed --version "$version" \
-        --architecture "$arch" --uid 0 --gid 0 "$name" > "$work/manifest.kdl"
+        --arch "$arch" --uid 0 --gid 0 "$name" > "$work/manifest.kdl"
     local require
     for require; do
         sed -i "/^package .* {\$/a\\    require \"$require\"" "$work/manifest.kdl"
     done
     sed -i "s|^package \"$name\" |&summary=\"Stage 0 seed: untrusted host toolchain\" |" "$work/manifest.kdl"
     cp -- "$work/manifest.kdl" "$stage0/${name//\//-}.kdl"
-    "$cps" publish --repo "$stage0/repo" --proto "$proto" --signing-key "$cache/keys/seed.der" \
+    "$cps" publish manifests --repo "$stage0/repo" --proto "$proto" --key "$cache/keys/seed.der" \
         "$work/manifest.kdl" >&2
 }
 publish system/elf-runtime "$runtime"
